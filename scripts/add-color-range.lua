@@ -4,7 +4,7 @@ function generateColorList(data)
     local colorList = {}
     
     local diff = 1/data.shades;
-    if (data.step) then
+    if (data.step ~= 0) then
         diff = data.step
     end
 
