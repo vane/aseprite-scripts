@@ -4,6 +4,9 @@ function generateColorList(data)
     local colorList = {}
     
     local diff = 1/data.shades;
+    if (data.step) then
+        diff = data.step
+    end
 
     local lightValue = data.color.lightness
     for i = 1, data.shades + 1 do
@@ -38,8 +41,9 @@ do
     end
     
     local data = Dialog():color{ id="color", label="Pick base color", color=Color{r=0,g=0,b=0,a=255} }
-    :slider{ id="shades", label="Color range", min=1, max=20, value=10 }
-    :check{id="lighten", label="Lighten if checked / darken if unchecked", selected=true}
+    :slider{ id="shades", label="Shades number", min=1, max=20, value=10 }    
+    :check{id="lighten", label="Lighten if checked / darken if unchecked", selected=true}    
+    :number{id="step", label="Step(optional) if empty it's calculated as 1/shades", decimals=3}
     :button{ id="ok", text="OK" }
     :button{ id="cancel", text="Cancel" }
     :show().data;
