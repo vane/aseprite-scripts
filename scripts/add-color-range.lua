@@ -1,16 +1,19 @@
---- loosly based on https://renderorder66.com/2020/03/23/AsepritePlugin.html
+--- loosely based on https://renderorder66.com/2020/03/23/AsepritePlugin.html
 
-function generateColorList(baseColor, shades)
+function generateColorList(data)
     local colorList = {}
     
-    local diff = 1/(shades + 2); --- add 2 so we don't start from 0(white) and end on 1 black
-    
-    local startLight = 1-diff
-    local endLight = 0+diff
-    
-    for light=startLight,endLight,-diff do
-        local color = Color{h=baseColor.hslHue, s=baseColor.hslSaturation, l=light}
+    local diff = 1/data.shades;
+
+    local lightValue = data.color.lightness
+    for i = 1, data.shades + 1 do
+        local color = Color{h=data.color.hslHue, s=data.color.hslSaturation, l=lightValue}        
         table.insert(colorList, color)
+        if (data.lighten) then
+            lightValue = lightValue + diff
+        else
+            lightValue = lightValue - diff
+        end
     end
 
     return colorList
@@ -20,9 +23,9 @@ end
 function addToPalette(pal, colorList)
     local j = #pal
 
-    pal:resize(#pal+#colorList) --- it will end with black color -1 if not
+    pal:resize(#pal+#colorList) --- it will start with black
     
-    for i = 1,#colorList-1 do        
+    for i = 1, #colorList - 1 do        
         j = j + 1
         pal:setColor(j, colorList[i])        
     end
@@ -34,16 +37,20 @@ do
         return app.alert("There is no active sprite")
     end
     
-    local color = Dialog():color{ id="color", label="Pick base color", color=Color{r=0,g=0,b=0,a=255} }
-    :slider{ id="shades", label="Color range", min=1, max=20, value=5 }
+    local data = Dialog():color{ id="color", label="Pick base color", color=Color{r=0,g=0,b=0,a=255} }
+    :slider{ id="shades", label="Color range", min=1, max=20, value=10 }
+    :check{id="lighten", label="Lighten if checked / darken if unchecked", selected=true}
     :button{ id="ok", text="OK" }
     :button{ id="cancel", text="Cancel" }
     :show().data;
 
-    if color.ok then        
+    if data.ok then                
+        local colorList = generateColorList(data)
         local pal = spr.palettes[1] --- get current palette
-        local colorList = generateColorList(color.color, color.shades)
+        
         addToPalette(pal, colorList);
+        
+        -- modify current palette
         spr:setPalette(pal);
     end
 end
